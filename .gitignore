@@ -26,3 +26,4 @@ Session.vim
 __pycache__/
 .pytest_cache
 .tox
+.vault
