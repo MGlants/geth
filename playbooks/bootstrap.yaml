@@ -1,0 +1,86 @@
+---
+- hosts: "all"
+  become: true
+  tasks:
+    - name: Check if already bootstrapped
+      stat:
+        path: /root/.bootstrapped
+      register: stat_result
+    - meta: end_play
+      name: Check if already bootstrapped
+      when: stat_result.stat.exists
+    - name: Add groups
+      ansible.builtin.group:
+        name: "admin"
+        state: present
+    - name: Add users
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        groups: "admin"
+        append: yes
+      loop: "{{ users }}"
+    - name: "Allow admin users to sudo without a password"
+      lineinfile:
+        dest: "/etc/sudoers" # path: in version 2.3
+        state: "present"
+        regexp: "^%admin"
+        line: "%admin ALL=(ALL) NOPASSWD: ALL"
+    - name: Set up multiple authorized keys
+      authorized_key:
+        user: "{{ item.name }}"
+        state: present
+        key: "{{ item.key }}"
+      loop: "{{ users }}"
+    - name: Remove unneeded packages
+      apt:
+        name:
+          - acpid
+          - bluez
+          - discover
+          - discover-data
+          - eject
+          - laptop-detect
+          - powertop
+          - task-laptop
+          - wireless-tools
+          - wpasupplicant
+          - console-setup
+          - cups
+          - dictionaries-common
+          - installation-report
+          - iso-codes
+          - chrony
+          - ispell
+          - krb5-locales
+          - man-db
+          - manpages
+          - nano
+          - shared-mime-info
+          - task-english
+          - util-linux-locales
+          - wamerican
+          - xkb-data
+          - xz-utils
+        state: absent
+    - name: Update all packages to their latest version
+      apt:
+        name: "*"
+        state: latest
+        update_cache: true
+        
+    - name: Remove useless packages from the cache
+      apt:
+        autoclean: yes
+    - name: Remove dependencies that are no longer required
+      apt:
+        autoremove: yes
+    - name: Disable root login
+      user:
+        name: root
+        password_lock: true
+    - name: Mark Node as bootstrapped
+      tags: bootstrapped
+      ansible.builtin.file:
+        path: /root/.bootstrapped
+        state: touch
+        mode: u+rw,g-wx,o-rwx

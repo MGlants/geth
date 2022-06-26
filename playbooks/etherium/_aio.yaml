@@ -1,0 +1,5 @@
+
+- hosts: etherium-nodes
+- import_playbook: ../bootstrap.yaml
+- import_playbook: install-monitoring.yaml
+- import_playbook: install-geth.yaml

@@ -1,0 +1,2 @@
+[etherium-nodes]
+etherium1 ansible_host=REDACTED

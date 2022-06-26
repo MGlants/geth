@@ -1,0 +1,19 @@
+- hosts: etherium-nodes
+  become: true
+  roles:
+    - { role: cloudalchemy.prometheus, become: yes, tags: [prometheus] }
+    - { role: cloudalchemy.grafana, become: yes, tags: [grafana]  }
+  pre_tasks:
+    - name: Create prometheus directory
+      file:
+        path: /etc/prometheus/file_sd/
+        state: directory
+    - name: Template prometheus rules
+      tags: prometheus
+      become: true
+      ansible.builtin.template:
+        src: templates/prometheus/{{item}}.j2
+        dest: /etc/prometheus/file_sd/{{item}}.yml
+        mode: "0644"
+      with_items:
+        - geth

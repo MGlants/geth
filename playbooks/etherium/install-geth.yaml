@@ -1,0 +1,32 @@
+- hosts: etherium-nodes
+  become: true
+  tasks:
+    - name: Install packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+        state: present
+        update_cache: yes
+
+    - name: Create geth directory
+      file:
+        path: /opt/geth
+        state: directory
+
+    - name: Template docker-compose
+      tags: outline
+      ansible.builtin.template:
+        src: templates/docker-compose.yaml.j2
+        dest: /opt/geth/docker-compose.yml
+        mode: "0644"
+
+    - name: Enable service docker, and start it
+      ansible.builtin.service:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: docker-compose start for geth
+      docker_compose:
+        project_src: /opt/geth
