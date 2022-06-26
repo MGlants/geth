@@ -1,0 +1,28 @@
+# OSX leaves these everywhere on SMB shares
+._*
+
+# OSX trash
+.DS_Store
+
+# Vscode files
+.vscode
+# Emacs save files
+*~
+\#*\#
+.\#*
+library
+# Vim-related files
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+
+#ansible
+*.retry
+*.log
+.molecule
+.cache
+__pycache__/
+.pytest_cache
+.tox
